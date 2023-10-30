@@ -1,15 +1,16 @@
 package main
 
 import (
-	"flag"
+	"fmt"
 	"html/template"
 	"log"
+	"net"
 	"net/http"
+	"os"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
-
-var addr = flag.String("addr", ":8080", "http service address")
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
@@ -43,12 +44,17 @@ func home(w http.ResponseWriter, r *http.Request) {
 	homeTemplate.Execute(w, "wss://"+r.Host+"/echo")
 }
 
-func main() {
-	flag.Parse()
+func StartWebSocketServer() {
+	var port = "8080"
+	if name := os.Getenv("PORT_ENV_NAME"); name != "" {
+		port = os.Getenv(name)
+		log.Printf("Get PORT_ENV_NAME=%v, try get env port=%v", name, port)
+	}
+	log.Printf("final use port=%v", port)
 	log.SetFlags(0)
 	http.HandleFunc("/echo", echo)
 	http.HandleFunc("/", home)
-	log.Fatal(http.ListenAndServe(*addr, nil))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", port), nil))
 }
 
 var homeTemplate = template.Must(template.New("").Parse(`
@@ -130,3 +136,73 @@ You can change the message and send multiple times.
 </body>
 </html>
 `))
+
+func IpPacketServer() {
+	netaddr, err := net.ResolveIPAddr("ip4", "10.82.170.194")
+	if err != nil {
+		fmt.Println("Server ResolveIPAddr err:", err)
+		return
+	}
+	conn, err := net.ListenIP("ip4:tcp", netaddr)
+	if err != nil {
+		fmt.Println("Server DialIP failed:", err)
+		return
+	}
+	fmt.Println("Server Listen success")
+	for {
+		data := make([]byte, 128)
+		readLen, remoteAddr, err := conn.ReadFromIP(data)
+		if err != nil {
+			fmt.Println("Server ReadFromIP err:", err)
+			return
+		}
+		fmt.Println("Server readFromIp:", string(data[:readLen]))
+		_, err = conn.WriteToIP([]byte("哈哈你好啊"), remoteAddr)
+		if err != nil {
+			fmt.Println("Server WriteToIP err:", err)
+			return
+		}
+	}
+}
+
+func IpPacketClient() {
+	netaddr, err := net.ResolveIPAddr("ip4", "127.0.0.1")
+	if err != nil {
+		fmt.Println("Client ResolveIPAddr err:", err)
+		return
+	}
+	conn, err := net.ListenIP("ip4:tcp", netaddr)
+	if err != nil {
+		fmt.Println("Client DialIP failed:", err)
+		return
+	}
+	fmt.Println("Client Listen success")
+	remoteAddr, err := net.ResolveIPAddr("ip4:tcp", "10.82.170.194")
+	var count = 0
+	for {
+		time.Sleep(20 * time.Millisecond)
+		if count > 10 {
+			break
+		}
+		count++
+		_, err = conn.WriteToIP([]byte("哈哈你好啊"), remoteAddr)
+		if err != nil {
+			fmt.Println("Client WriteToIP err:", err)
+			return
+		}
+		data := make([]byte, 128)
+		readLen, _, err := conn.ReadFromIP(data)
+		if err != nil {
+			fmt.Println("Client ReadFromIP err:", err)
+			return
+		}
+		fmt.Println("Client readFromIp:", string(data[:readLen]))
+	}
+}
+
+func main() {
+	go IpPacketServer()
+	time.Sleep(1 * time.Second)
+	IpPacketClient()
+	fmt.Println("进程退出")
+}
