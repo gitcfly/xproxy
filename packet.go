@@ -380,32 +380,32 @@ func getUnsignedInt(value int32) int64 {
 	return int64(value) & 0xFFFFFFFF
 }
 
-func Int16ToBytes(v int16) []byte {
+func Int16ToBytes(v uint16) []byte {
 	buf := make([]byte, 2)
-	binary.BigEndian.PutUint16(buf, uint16(v))
+	binary.BigEndian.PutUint16(buf, v)
 	return buf
 }
 
-func Int32ToBytes(v int32) []byte {
+func Int32ToBytes(v uint32) []byte {
 	buf := make([]byte, 4)
-	binary.BigEndian.PutUint32(buf, uint32(v))
+	binary.BigEndian.PutUint32(buf, v)
 	return buf
 }
 
-func Int64ToBytes(v int64) []byte {
+func Int64ToBytes(v uint64) []byte {
 	buf := make([]byte, 8)
-	binary.BigEndian.PutUint64(buf, uint64(v))
+	binary.BigEndian.PutUint64(buf, v)
 	return buf
 }
 
-func BytesToInt16(v []byte) int16 {
-	return int16(binary.BigEndian.Uint16(v))
+func BytesToInt16(v []byte) uint16 {
+	return binary.BigEndian.Uint16(v)
 }
 
-func BytesToInt32(v []byte) int32 {
-	return int32(binary.BigEndian.Uint32(v))
+func BytesToInt32(v []byte) uint32 {
+	return binary.BigEndian.Uint32(v)
 }
 
-func BytesToInt64(v []byte) int64 {
-	return int64(binary.BigEndian.Uint64(v))
+func BytesToInt64(v []byte) uint64 {
+	return binary.BigEndian.Uint64(v)
 }

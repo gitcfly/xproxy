@@ -10,10 +10,11 @@ func RemoteTcpInput(tcb *TCB) {
 	for {
 		buf := make([]byte, BUFFER_SIZE)
 		readLen, err := tcb.RemoteConn.Read(buf)
+		transDataToClient(buf, int32(readLen), tcb)
 		if err != nil || readLen <= 0 {
 			glg.Errorf("remote read data err=%v", err)
+			return
 		}
-		transDataToClient(buf, int32(readLen), tcb)
 	}
 }
 

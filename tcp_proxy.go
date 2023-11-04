@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io"
 	"net"
 	"runtime/debug"
 
@@ -30,8 +29,8 @@ func StartTcpProxy() {
 func HandleClientTcpConnection(clientConn net.Conn) {
 	defer HandlePanicError()
 	for {
-		buf, err := ReadPacket(clientConn)
-		if err != nil && err != io.EOF {
+		buf, err := ReadPacketV3(clientConn)
+		if err != nil {
 			glg.Errorf("读取客户端数据失败 err=%v", err)
 			return
 		}
@@ -71,7 +70,7 @@ func HandlePanicError() {
 }
 
 func sendDataToClient(conn net.Conn, buffer *BytesBuffer) error {
-	_, err := WritePacket(conn, buffer.getFullBytes())
+	_, err := WritePacketV3(conn, buffer.getFullBytes())
 	if err != nil {
 		glg.Errorf("sendDataToClient write data err=%v", err)
 		return err
@@ -82,6 +81,17 @@ func sendDataToClient(conn net.Conn, buffer *BytesBuffer) error {
 func sendDataToRemote(conn net.Conn, headerLen int32, buffer *BytesBuffer) error {
 	data := buffer.getFullBytes()
 	_, err := conn.Write(data[headerLen:])
+	if err != nil {
+		glg.Errorf("sendDataToRemote write data err=%v", err)
+		return err
+	}
+	return nil
+}
+
+func sendUdpDataToRemote(conn net.Conn, addr *net.UDPAddr, headerLen int32, buffer *BytesBuffer) error {
+	data := buffer.getFullBytes()
+	writeData := data[headerLen:]
+	_, err := conn.Write(writeData)
 	if err != nil {
 		glg.Errorf("sendDataToRemote write data err=%v", err)
 		return err

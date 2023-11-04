@@ -99,6 +99,19 @@ func WritePacket(writer io.Writer, data []byte) (n int, err error) {
 	return n - len(data), err
 }
 
+func ReadPacketV3(reader io.Reader) ([]byte, error) {
+	data := make([]byte, BUFFER_SIZE)
+	n, err := reader.Read(data)
+	if n > 0 {
+		return data[:n], err
+	}
+	return nil, err
+}
+
+func WritePacketV3(writer io.Writer, data []byte) (n int, err error) {
+	return writer.Write(data)
+}
+
 func ReadFull(reader io.Reader, buf []byte) (n int, err error) {
 	ln, left := len(buf), len(buf)
 	for left > 0 {
@@ -130,4 +143,46 @@ func WriteEnd(writer io.Writer) (n int, err error) {
 func AddHead(vas []byte, head []byte) []byte {
 	var newBytes = append(head, vas...)
 	return newBytes
+}
+
+func AddTail(vas []byte, tail []byte) []byte {
+	vas = append(vas, tail...)
+	return vas
+}
+
+func WrapPacket(data []byte) []byte {
+	heads := Int16ToBytes(uint16(len(data)))
+	data = AddHead(data, heads)
+	data = AddTail(data, []byte{0})
+	return data
+}
+
+func WriteDataV2(writer io.Writer, data []byte) error {
+	var packet = WrapPacket(data)
+	for len(packet) > 0 {
+		n, err := writer.Write(packet)
+		if err != nil {
+			return err
+		}
+		if n == len(packet) {
+			break
+		}
+		packet = packet[n:]
+	}
+	return nil
+}
+
+func ReadDataV2(reader io.Reader) ([]byte, error) {
+	var heads = make([]byte, 2)
+	n, err := io.ReadFull(reader, heads)
+	if err != nil || n != 2 {
+		return nil, fmt.Errorf("read packet header length is error: %v", err)
+	}
+	dLen := int32(BytesToInt16(heads))
+	var data = make([]byte, dLen+1)
+	n, err = io.ReadFull(reader, data)
+	if int32(n) < (dLen + 1) {
+		return nil, fmt.Errorf("read packet data is error: %v", err)
+	}
+	return data[:len(data)-1], err
 }

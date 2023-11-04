@@ -30,15 +30,15 @@ func (r *BytesBuffer) get(at int32) byte {
 }
 
 func (r *BytesBuffer) getShort(at int32) int16 {
-	return BytesToInt16(r.Data[at : at+2])
+	return int16(BytesToInt16(r.Data[at : at+2]))
 }
 
 func (r *BytesBuffer) getInt(at int32) int32 {
-	return BytesToInt32(r.Data[at : at+4])
+	return int32(BytesToInt32(r.Data[at : at+4]))
 }
 
 func (r *BytesBuffer) getInt64(at int32) int64 {
-	return BytesToInt64(r.Data[at : at+8])
+	return int64(BytesToInt64(r.Data[at : at+8]))
 }
 
 func (r *BytesBuffer) getBytes(at int32, dest []byte) int32 {
@@ -62,7 +62,7 @@ func (r *BytesBuffer) put(at int32, v byte) {
 }
 
 func (r *BytesBuffer) putShort(at int32, v int16) {
-	vs := Int16ToBytes(v)
+	vs := Int16ToBytes(uint16(v))
 	for i := 0; i < len(vs); i++ {
 		r.Data[at+int32(i)] = vs[i]
 	}
@@ -70,7 +70,7 @@ func (r *BytesBuffer) putShort(at int32, v int16) {
 }
 
 func (r *BytesBuffer) putInt(at int32, v int32) {
-	vs := Int32ToBytes(v)
+	vs := Int32ToBytes(uint32(v))
 	for i := 0; i < len(vs); i++ {
 		r.Data[at+int32(i)] = vs[i]
 	}
@@ -78,7 +78,7 @@ func (r *BytesBuffer) putInt(at int32, v int32) {
 }
 
 func (r *BytesBuffer) putInt64(at int32, v int64) {
-	vs := Int64ToBytes(v)
+	vs := Int64ToBytes(uint64(v))
 	for i := 0; i < len(vs); i++ {
 		r.Data[at+int32(i)] = vs[i]
 	}
