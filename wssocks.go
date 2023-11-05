@@ -2,10 +2,13 @@ package main
 
 import (
 	"fmt"
+	"net"
 	"net/http"
+	"time"
 
 	"github.com/armon/go-socks5"
 	"github.com/kpango/glg"
+	"golang.org/x/net/context"
 	"golang.org/x/net/websocket"
 )
 
@@ -31,6 +34,9 @@ func StartWsSocksServer(port int64) {
 	cator := socks5.UserPassAuthenticator{Credentials: cred}
 	socksServer, _ = socks5.New(&socks5.Config{
 		AuthMethods: []socks5.Authenticator{cator},
+		Dial: func(ctx context.Context, network, addr string) (net.Conn, error) {
+			return net.DialTimeout(network, addr, 10*time.Second)
+		},
 	})
 	http.Handle("/wssocks", &websocket.Server{
 		Handler: ws2socks,
