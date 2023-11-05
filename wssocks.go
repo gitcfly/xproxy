@@ -17,12 +17,12 @@ var socksServer *socks5.Server
 func ws2socks(ws *websocket.Conn) {
 	glg.Printf("receive ws: %p", ws)
 	defer func() {
+		_ = ws.Close()
 		glg.Printf("finish ws: %p", ws)
 	}()
 	err := socksServer.ServeConn(ws)
 	if err != nil {
 		glg.Errorf("ws serve error %v:", err)
-		_ = ws.Close()
 		return
 	}
 }
