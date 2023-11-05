@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/armon/go-socks5"
@@ -9,25 +8,35 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-var socks, _ = socks5.New(&socks5.Config{})
+var socksServer *socks5.Server
 
 func ws2socks(ws *websocket.Conn) {
-	log.Printf("[INFO] receive ws: %p\n", ws)
+	glg.Printf("receive ws: %p", ws)
 	defer func() {
-		log.Printf("[INFO] close ws: %p\n", ws)
-		_ = ws.Close()
+		glg.Printf("finish ws: %p", ws)
 	}()
-	err := socks.ServeConn(ws)
+	err := socksServer.ServeConn(ws)
 	if err != nil {
-		glg.Errorf("[ERROR] ws serve error:", err)
+		glg.Errorf("ws serve error:", err)
+		_ = ws.Close()
 		return
 	}
 }
 
-func StartWsSocksServer() {
-	http.Handle("/wssocks", websocket.Handler(ws2socks))
+func StartWsSocksServer(port int64) {
+	cred := socks5.StaticCredentials{
+		"yechenvk": "yechen123321",
+	}
+	cator := socks5.UserPassAuthenticator{Credentials: cred}
+	socksServer, _ = socks5.New(&socks5.Config{
+		AuthMethods: []socks5.Authenticator{cator},
+	})
+	http.Handle("/wssocks", &websocket.Server{
+		Handler: ws2socks,
+	})
 	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
 		writer.Write([]byte("hello"))
 	})
+	glg.Infof("StartWsSocksServer=%v", port)
 	glg.Fatalln(http.ListenAndServe(":8080", nil))
 }

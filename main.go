@@ -1,5 +1,5 @@
 package main
 
 func main() {
-	StartWsSocksServer()
+	StartWsSocksServer(8080)
 }
