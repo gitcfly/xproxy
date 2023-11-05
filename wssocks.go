@@ -21,7 +21,7 @@ func ws2socks(ws *websocket.Conn) {
 	}()
 	err := socksServer.ServeConn(ws)
 	if err != nil {
-		glg.Errorf("ws serve error:", err)
+		glg.Errorf("ws serve error %v:", err)
 		_ = ws.Close()
 		return
 	}
