@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/armon/go-socks5"
@@ -38,5 +39,6 @@ func StartWsSocksServer(port int64) {
 		writer.Write([]byte("hello"))
 	})
 	glg.Infof("StartWsSocksServer=%v", port)
-	glg.Fatalln(http.ListenAndServe(":8080", nil))
+	var runPort = fmt.Sprintf(":%v", port)
+	glg.Fatalln(http.ListenAndServe(runPort, nil))
 }
