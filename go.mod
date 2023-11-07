@@ -12,6 +12,7 @@ require (
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/kpango/fastime v1.1.9 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
+	github.com/things-go/go-socks5 v0.0.4 // indirect
 	golang.org/x/sys v0.13.0 // indirect
 )
 
