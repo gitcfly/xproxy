@@ -38,9 +38,7 @@ func StartWsSocksServer(port int64) {
 			return net.DialTimeout(network, addr, 10*time.Second)
 		},
 	})
-	http.Handle("/wssocks", &websocket.Server{
-		Handler: ws2socks,
-	})
+	http.Handle("/wssocks", &websocket.Server{Handler: ws2socks})
 	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
 		writer.Write([]byte("hello"))
 	})

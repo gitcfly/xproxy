@@ -14,3 +14,5 @@ require (
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	golang.org/x/sys v0.13.0 // indirect
 )
+
+replace github.com/eahydra/socks => github.com/gitcfly/socks v0.0.0-20231107044951-a41bfb446ca1
